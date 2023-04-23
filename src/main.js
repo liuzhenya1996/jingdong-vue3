@@ -4,5 +4,6 @@ import router from './router'
 import store from './store'
 import 'normalize.css'
 import './style/base.scss'
+import './assets/fonts/iconfont.css'
 
 createApp(App).use(store).use(router).mount('#app')
