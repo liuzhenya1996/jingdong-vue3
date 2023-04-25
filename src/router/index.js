@@ -27,6 +27,10 @@ const routes = [
         next({ name: 'home ' })
       } else { next() }
     }
+  }, {
+    path: '/shop',
+    name: 'shop',
+    component: () => import(/* webpackChunkName: "shop" */ '../views/shop/ShopView.vue')
   }
 ]
 

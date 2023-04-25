@@ -1,0 +1,220 @@
+<template>
+    <div class="content">
+      <div class="category">
+          <div
+            v-for="(item, index) in categories" :key="index" @click="() => handleTabClick(item.tab)"
+            :class="{ 'category_item': true, 'category_item-active': currentTab === item.tab ? true : false }"
+          >
+            {{ item.name }}
+        </div>
+      </div>
+      <div class="product">
+        <div v-for="item in contentList" :key="item._id" class="product_item">
+          <img class="product_item_img" :src="item.imgUrl" />
+          <div class="product_item_detail">
+            <div class="product_item_title">{{ item.name }}</div>
+            <p class="product_item_sales">月售{{ item.sales }}件</p>
+            <p class="product_item_price">
+              <span class="product_item_yen">&yen;</span>{{ item.price }}
+              <span class="product_item_origin">&yen;{{ item.oldPrice }}</span>
+            </p>
+          </div>
+          <div class="product_number">
+            <span class="product_number_minus">-</span>
+              {{ 0 }}
+            <span class="product_number_plus">+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+</template>
+
+<script>
+import { reactive, toRefs, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
+import { get } from '../../utiles/request'
+
+// 得到侧边栏tab
+const useTabEffect = () => {
+  const categories = [{
+    name: '全部商品',
+    tab: 'all'
+  }, {
+    name: '秒杀',
+    tab: 'seckill'
+  }, {
+    name: '新鲜水果',
+    tab: 'fruit'
+  }]
+  return { categories }
+}
+
+// 监听侧边栏不同切换不同内容
+const useGetContentEffect = (currentTab) => {
+  const route = useRoute()
+  const { shopId } = route.query
+  const data = reactive({
+    contentList: []
+  })
+  const getContentData = async () => {
+    const result = await get(`/api/shop/${shopId}/products`, {
+      tab: currentTab.value
+    })
+    if (result.errno === 0 && result.data.length) {
+      data.contentList = result.data
+    }
+  }
+  // 在这里，我们知道，getContentData 是依赖于 currentTab 的，但是使用 watchEffect 后，vue会智能的监听你所依赖的数据，很好用，不用指定依赖哪个数据
+  watchEffect(() => {
+    getContentData()
+  })
+  const { contentList } = toRefs(data)
+  return { contentList, shopId }
+}
+
+// 侧边栏，选中的效果1：切取内容，2：背景变白
+const useTabClickEffect = () => {
+  const data = reactive({
+    currentTab: 'all'
+  })
+  const handleTabClick = (tab) => {
+    data.currentTab = tab
+  }
+  const { currentTab } = toRefs(data)
+  return { handleTabClick, currentTab }
+}
+
+export default {
+  name: 'ContentView',
+  props: ['shopName'],
+  setup () {
+    const { categories } = useTabEffect()
+    const { currentTab, handleTabClick } = useTabClickEffect()
+    const { contentList } = useGetContentEffect(currentTab)
+
+    return {
+      contentList,
+      categories,
+      handleTabClick,
+      currentTab
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+@import '../../style/viriables.scss';
+@import '../../style/mixins.scss';
+
+.content {
+  display: flex;
+  position: absolute;
+  left: 0;
+  top: 1.5rem;
+  right: 0;
+  bottom: .5rem;
+}
+
+.category {
+  overflow-y: scroll;
+  width: .76rem;
+  background: $search-bg-color;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &_item {
+    line-height: .4rem;
+    text-align: center;
+    font-size: .14rem;
+    color: $content-font-color;
+    width: .76rem;
+    display: block;
+
+    &-active {
+      background: #fff;
+    }
+  }
+}
+
+.product {
+  overflow-y: scroll;
+  flex: 1;
+  &_item {
+    position: relative;
+    display: flex;
+    padding: .12rem 0;
+    margin: 0 .16rem;
+    border-bottom: 1px solid #F1F1F1;
+
+    &_img {
+      width: .68rem;
+      height: .68rem;
+      margin-right: .16rem;
+    }
+
+    &_detail {
+      overflow: hidden;
+    }
+
+    &_title {
+      font-size: .14rem;
+      color: $content-font-color;
+      line-height: .2rem;
+      @include ellipsis;
+    }
+
+    &_sales {
+      margin: .08rem 0;
+      font-size: .12rem;
+      line-height: .16rem;
+    }
+
+    &_price {
+      color: #E93B3B;
+      margin: 0;
+      line-height: .2rem;
+      font-size: .14rem;
+    }
+
+    &_yen {
+      font-size: .08rem;
+    }
+
+    &_origin {
+      font-size: .1rem;
+      color: #999999;
+      line-height: .2rem;
+      text-decoration: line-through;
+      margin-left: .05rem;
+    }
+
+    .product_number {
+      position: absolute;
+      right: 0;
+      bottom: 0.12rem;
+
+      &_minus,
+      &_plus {
+        display: inline-block;
+        width: .2rem;
+        height: .2rem;
+        border-radius: 50%;
+        text-align: center;
+        line-height: .16rem;
+        font-size: .2rem;
+      }
+
+      &_minus {
+        border: .01rem solid #666;
+        margin-right: .05rem;
+      }
+
+      &_plus {
+        background: #0091FF;
+        color: #fff;
+        margin-left: .05rem;
+      }
+    }
+  }
+}
+</style>
