@@ -9,7 +9,7 @@
       </div>
     </div>
     <ShopInfo :item='data.item' v-show='data.item.imgUrl' />
-    <ContentView :shopName='data.item.name' />
+    <ContentView :marketName='data.item.name' />
   </div>
 </template>
 

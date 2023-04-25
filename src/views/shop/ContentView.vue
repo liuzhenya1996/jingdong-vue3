@@ -20,9 +20,9 @@
             </p>
           </div>
           <div class="product_number">
-            <span class="product_number_minus">-</span>
-              {{ 0 }}
-            <span class="product_number_plus">+</span>
+            <span class="product_number_minus" @click="changeShopNum(item, -1)">-</span>
+              {{ getItemCount(item) }}
+            <span class="product_number_plus" @click="changeShopNum(item, 1)">+</span>
           </div>
         </div>
       </div>
@@ -33,6 +33,7 @@
 import { reactive, toRefs, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { get } from '../../utiles/request'
+import { useStore } from 'vuex'
 
 // 得到侧边栏tab
 const useTabEffect = () => {
@@ -84,19 +85,54 @@ const useTabClickEffect = () => {
   return { handleTabClick, currentTab }
 }
 
+// 点击加减时，将数据直接同步至 vuex，并直接使用 vuex 中的数据
+const useChangeItemEffect = (marketName) => {
+  const store = useStore()
+  const route = useRoute()
+  const { shopId: marketId } = route.query
+  const cartList = store.state.cartList
+  const changeShopNum = (shopItem, changeNum) => {
+    const {
+      name: shopName,
+      _id: shopId,
+      imgUrl: shopImgUrl,
+      oldPrice: shopOldPrice,
+      price: shopPrice,
+      sales: shopSales
+    } = shopItem
+    store.commit('changeCartList', { marketName, marketId, shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, changeNum })
+  }
+  const getItemCount = (shopItem) => {
+    const market = store.state.cartList.find(i => i.marketId === marketId)
+    if (!market) return 0
+    else {
+      const shop = market.shopList.find(i => i.shopId === shopItem._id)
+      if (!shop) return 0
+      else {
+        return shop.count
+      }
+    }
+  }
+  return { cartList, changeShopNum, getItemCount }
+}
+
 export default {
   name: 'ContentView',
-  props: ['shopName'],
-  setup () {
+  props: ['marketName'],
+  setup (props) {
     const { categories } = useTabEffect()
     const { currentTab, handleTabClick } = useTabClickEffect()
     const { contentList } = useGetContentEffect(currentTab)
+    const { cartList, changeShopNum, getItemCount } = useChangeItemEffect(props.marketName)
 
     return {
       contentList,
       categories,
       handleTabClick,
-      currentTab
+      currentTab,
+      cartList,
+      changeShopNum,
+      getItemCount
     }
   }
 }
