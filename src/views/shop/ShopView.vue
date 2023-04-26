@@ -10,6 +10,7 @@
     </div>
     <ShopInfo :item='data.item' v-show='data.item.imgUrl' />
     <ContentView :marketName='data.item.name' />
+    <CartView />
   </div>
 </template>
 
@@ -19,6 +20,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { get } from '../../utiles/request'
 import ShopInfo from '../../components/ShopInfo.vue'
 import ContentView from './ContentView.vue'
+import CartView from './CartView.vue'
 
 // 获取当前商铺信息
 const useShopInfoEffect = () => {
@@ -41,7 +43,7 @@ const useBackRouterEffect = () => {
 }
 export default {
   name: 'ShopView',
-  components: { ShopInfo, ContentView },
+  components: { ShopInfo, ContentView, CartView },
   setup () {
     const { data, getItemData } = useShopInfoEffect()
     getItemData()
