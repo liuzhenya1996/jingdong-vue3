@@ -110,8 +110,8 @@ export default {
     height: .48rem;
     margin: 0 .4rem .16rem .4rem;
     background-color: #F9F9F9;
-    border: 1px solid rgba($color: #000000, $alpha: 0.1);
-    border-radius: 6px;
+    border: 0.01rem solid rgba($color: #000000, $alpha: 0.1);
+    border-radius: 0.06trm;
 
     &_content {
       box-sizing: border-box;
@@ -120,7 +120,7 @@ export default {
       background: none;
       border: none;
       padding: 0 .16rem;
-      font-size: 16px;
+      font-size: 0.16rem;
       color: $content-notice-color;
     }
   }

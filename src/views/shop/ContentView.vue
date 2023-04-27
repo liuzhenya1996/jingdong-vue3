@@ -170,7 +170,7 @@ export default {
     display: flex;
     padding: .12rem 0;
     margin: 0 .16rem;
-    border-bottom: 1px solid #F1F1F1;
+    border-bottom: 0.01rem solid #F1F1F1;
 
     &_img {
       width: .68rem;

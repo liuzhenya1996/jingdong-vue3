@@ -31,7 +31,7 @@ export default {
   padding: 0 .18rem;
   height: 0.49rem;
   width: 100%;
-  border-top: 1px solid $content-bg-color;
+  border-top: 0.01rem solid $content-bg-color;
   display: flex;
   color: $content-font-color;
 
@@ -45,7 +45,7 @@ export default {
     }
 
     .docker_title {
-      font-size: 20px;
+      font-size: 0.2rem;
       transform: scale(0.5, 0.5);
       transform-origin: top;
     }

@@ -131,7 +131,7 @@ export default {
   &__header {
     display: flex;
     line-height: .52rem;
-    border-bottom: 1px solid $content-bg-color;
+    border-bottom: 0.01rem solid $content-bg-color;
     font-size: .14rem;
     color: $content-font-color;
 

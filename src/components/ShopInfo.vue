@@ -40,7 +40,7 @@ export default {
         flex: 1;
 
         &_bordered {
-            border-bottom: 1px solid $content-bg-color;
+            border-bottom: 0.01rem solid $content-bg-color;
         }
 
         &_title {
