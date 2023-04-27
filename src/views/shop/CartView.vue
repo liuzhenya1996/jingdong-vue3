@@ -4,40 +4,38 @@
     <div class="cart">
       <div class="product" v-show="showStatus">
         <div class="product__header">
-          <div class="product__header__all">
-            <span class="product__header__icon iconfont" v-html="'&#xe667;'"></span>
-            全选
-          </div>
+          <div class="product__header__all" @click="toggleAllChecked"> {{getAllCheced() ? '已全选' : '未全选'}} </div>
           <div class="product__header__clear">
-            <span class="product__header__clear__btn">清空购物车</span>
+            <span class="product__header__clear__btn" @click="clearShopList">清空购物车</span>
           </div>
         </div>
-        <template v-for="item in productList">
-          <div class="product__item" v-if="item.count > 0" :key="item._id">
-            <div class="product__item__checked iconfont" v-html="'&#xe667;'"></div>
-            <img class="product__item__img" />
+        <div v-for="shop in getShopList()" :key="shop.shopId">
+          <div class="product__item">
+            <div class="product__item__checked iconfont" @click="changeShopChecked(formatShop(shop), !shop.checked)">{{shop.checked ? '已选' : '未选'}}</div>
+            <img class="product__item__img" :src="shop.shopImgUrl" />
             <div class="product__item__detail">
-              <h4 class="product__item__title">{{ '名称' }}</h4>
+              <h4 class="product__item__title">{{ shop.shopName }}</h4>
               <p class="product__item__price">
-                <span class="product__item__yen">&yen;</span>{{ 0 }}
-                <span class="product__item__origin">&yen;{{ 0 }}</span>
+                <span class="product__item__yen">&yen;</span>{{ shop.shopPrice }}
+                <span class="product__item__origin">&yen;{{ shop.shopOldPrice }}</span>
               </p>
             </div>
             <div class="product__number">
-              <span class="product__number__minus">-</span>
-              {{ 0 }}
-              <span class="product__number__plus">+</span>
+              <span class="product__number__minus" @click="changeShopNum(formatShop(shop), -1)">-</span>
+              {{ shop.count }}
+              <span class="product__number__plus" @click="changeShopNum(formatShop(shop), 1)">+</span>
             </div>
           </div>
-        </template>
+        </div>
+        <div class="product__empty" v-if="!getShopList().length">购物车为空</div>
       </div>
       <div class="check">
         <div class="check__icon" @click="toggleShowStatus">
           <img src="http://www.dell-lee.com/imgs/vue3/basket.png" class="check__icon__img" />
-          <div class="check__icon__tag">0</div>
+          <div class="check__icon__tag">{{ getShopListCount() }}</div>
         </div>
         <div class="check__info" @click="toggleShowStatus">
-          总计：<span class="check__info__price">&yen; 0</span>
+          总计：<span class="check__info__price">&yen; {{ getShopListPrice() }}</span>
         </div>
         <div class="check__btn">
           <router-link :to="{}">
@@ -50,19 +48,53 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-const useShowCartViewEffect = () => {
+import { ref, toRefs } from 'vue'
+import { useCartEffect } from './cartEffect'
+const useShowCartViewEffect = (getShopList) => {
   const showStatus = ref(false)
   const toggleShowStatus = () => {
     showStatus.value = !showStatus.value
   }
-  return { showStatus, toggleShowStatus }
+  return { toggleShowStatus, showStatus }
+}
+const formatShop = (item) => {
+  const {
+    shopName,
+    shopId,
+    shopImgUrl,
+    shopOldPrice,
+    shopPrice,
+    shopSales
+  } = item
+  return {
+    shopName,
+    shopId,
+    shopImgUrl,
+    shopOldPrice,
+    shopPrice,
+    shopSales
+  }
 }
 export default {
-  setup () {
-    const { showStatus, toggleShowStatus } = useShowCartViewEffect()
+  props: ['marketName'],
+  setup (props) {
+    const { marketName } = toRefs(props)
+    const { cartList, changeShopNum, changeShopChecked, toggleAllChecked, getAllCheced, getShopCount, getShopList, getShopListCount, getShopListPrice, clearShopList } = useCartEffect(marketName)
+    const { showStatus, toggleShowStatus } = useShowCartViewEffect(getShopList)
     return {
-      showStatus, toggleShowStatus
+      showStatus,
+      toggleShowStatus,
+      cartList,
+      changeShopNum,
+      changeShopChecked,
+      getShopCount,
+      getShopList,
+      getShopListCount,
+      getShopListPrice,
+      formatShop,
+      toggleAllChecked,
+      getAllCheced,
+      clearShopList
     }
   }
 }
@@ -125,6 +157,15 @@ export default {
         display: inline-block;
       }
     }
+  }
+
+  &__empty {
+    height: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.2rem;
+    color: grey;
   }
 
   &__item {

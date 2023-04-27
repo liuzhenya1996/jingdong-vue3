@@ -28,8 +28,8 @@ const userNearbyListEffect = () => {
 
 const useLinkToContentEffect = () => {
   const router = useRouter()
-  const linkToContent = (shopId) => {
-    router.push({ name: 'shop', query: { shopId } })
+  const linkToContent = (marketId) => {
+    router.push({ name: 'shop', query: { marketId } })
   }
   return linkToContent
 }

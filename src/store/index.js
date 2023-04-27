@@ -24,23 +24,33 @@ export default createStore({
   getters: {
   },
   mutations: {
-    changeCartList (state, { marketName, marketId, shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, changeNum }) {
+    changeCartList (state, { marketName, marketId, shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, changeNum, checked }) {
       const market = state.cartList.find(i => i.marketId === marketId)
       if (!market) {
         state.cartList.push({
           marketName,
           marketId,
-          shopList: [{ shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, count: 1, checked: false }]
+          shopList: [{ shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, count: 1, checked }]
         })
       } else {
         const shop = market.shopList.find(i => i.shopId === shopId)
         if (!shop) {
-          market.shopList.push({ shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, count: 1, checked: false })
+          market.shopList.push({ shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, count: 1, checked })
         } else {
           shop.count = Math.max(0, shop.count + changeNum)
-          if (shop.count > 0) shop.checked = true
+          shop.checked = checked
         }
       }
+    },
+    toggleAllChecked (state, { marketId, checked }) {
+      const market = state.cartList.find(i => i.marketId === marketId)
+      market.shopList.forEach(shop => {
+        shop.checked = checked
+      })
+    },
+    clearShopList (state, marketId) {
+      const market = state.cartList.find(i => i.marketId === marketId)
+      market.shopList = []
     }
   },
   actions: {

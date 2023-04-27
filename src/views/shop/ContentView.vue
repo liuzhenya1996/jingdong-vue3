@@ -20,9 +20,9 @@
             </p>
           </div>
           <div class="product_number">
-            <span class="product_number_minus" @click="changeShopNum(item, -1)">-</span>
-              {{ getItemCount(item) }}
-            <span class="product_number_plus" @click="changeShopNum(item, 1)">+</span>
+            <span class="product_number_minus" @click="changeShopNum(formatShop(item), -1)">-</span>
+              {{ getShopCount(item._id) }}
+            <span class="product_number_plus" @click="changeShopNum(formatShop(item), 1)">+</span>
           </div>
         </div>
       </div>
@@ -31,9 +31,9 @@
 
 <script>
 import { reactive, toRefs, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
 import { get } from '../../utiles/request'
-import { useStore } from 'vuex'
+import { useCartEffect } from './cartEffect'
+import { useRouteEffect } from './routeEffect'
 
 // 得到侧边栏tab
 const useTabEffect = () => {
@@ -52,13 +52,13 @@ const useTabEffect = () => {
 
 // 监听侧边栏不同切换不同内容
 const useGetContentEffect = (currentTab) => {
-  const route = useRoute()
-  const { shopId } = route.query
+  const { getQueryValue } = useRouteEffect()
+  const marketId = getQueryValue('marketId')
   const data = reactive({
     contentList: []
   })
   const getContentData = async () => {
-    const result = await get(`/api/shop/${shopId}/products`, {
+    const result = await get(`/api/shop/${marketId}/products`, {
       tab: currentTab.value
     })
     if (result.errno === 0 && result.data.length) {
@@ -70,7 +70,7 @@ const useGetContentEffect = (currentTab) => {
     getContentData()
   })
   const { contentList } = toRefs(data)
-  return { contentList, shopId }
+  return { contentList, marketId }
 }
 
 // 侧边栏，选中的效果1：切取内容，2：背景变白
@@ -85,35 +85,23 @@ const useTabClickEffect = () => {
   return { handleTabClick, currentTab }
 }
 
-// 点击加减时，将数据直接同步至 vuex，并直接使用 vuex 中的数据
-const useChangeItemEffect = (marketName) => {
-  const store = useStore()
-  const route = useRoute()
-  const { shopId: marketId } = route.query
-  const cartList = store.state.cartList
-  const changeShopNum = (shopItem, changeNum) => {
-    const {
-      name: shopName,
-      _id: shopId,
-      imgUrl: shopImgUrl,
-      oldPrice: shopOldPrice,
-      price: shopPrice,
-      sales: shopSales
-    } = shopItem
-    store.commit('changeCartList', { marketName, marketId, shopName, shopId, shopImgUrl, shopOldPrice, shopPrice, shopSales, changeNum })
+const formatShop = (item) => {
+  const {
+    name: shopName,
+    _id: shopId,
+    imgUrl: shopImgUrl,
+    oldPrice: shopOldPrice,
+    price: shopPrice,
+    sales: shopSales
+  } = item
+  return {
+    shopName,
+    shopId,
+    shopImgUrl,
+    shopOldPrice,
+    shopPrice,
+    shopSales
   }
-  const getItemCount = (shopItem) => {
-    const market = store.state.cartList.find(i => i.marketId === marketId)
-    if (!market) return 0
-    else {
-      const shop = market.shopList.find(i => i.shopId === shopItem._id)
-      if (!shop) return 0
-      else {
-        return shop.count
-      }
-    }
-  }
-  return { cartList, changeShopNum, getItemCount }
 }
 
 export default {
@@ -123,7 +111,8 @@ export default {
     const { categories } = useTabEffect()
     const { currentTab, handleTabClick } = useTabClickEffect()
     const { contentList } = useGetContentEffect(currentTab)
-    const { cartList, changeShopNum, getItemCount } = useChangeItemEffect(props.marketName)
+    const { marketName } = toRefs(props)
+    const { cartList, changeShopNum, getShopCount } = useCartEffect(marketName)
 
     return {
       contentList,
@@ -132,7 +121,8 @@ export default {
       currentTab,
       cartList,
       changeShopNum,
-      getItemCount
+      getShopCount,
+      formatShop
     }
   }
 }

@@ -10,7 +10,7 @@
     </div>
     <ShopInfo :item='data.item' v-show='data.item.imgUrl' />
     <ContentView :marketName='data.item.name' />
-    <CartView />
+    <CartView :marketName='data.item.name' />
   </div>
 </template>
 
@@ -27,7 +27,7 @@ const useShopInfoEffect = () => {
   const route = useRoute()
   const data = reactive({ item: {} })
   const getItemData = async () => {
-    const result = await get(`/api/shop/${route.query.shopId}`)
+    const result = await get(`/api/shop/${route.query.marketId}`)
     if (result.errno === 0 && result.data) {
       data.item = result.data
     }
